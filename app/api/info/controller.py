@@ -17,12 +17,12 @@ RK_COOKIES = 'cookies'
 @controller
 class Info(UserAPIController):
     def callback_before_register(self):
-        super().callback_before_register()
-
         @self.blueprint.errorhandler(AccessError)
         def refresh_cookies(e):
             redis.cli.delete(RK_COOKIES)
             self.error(*ACCESS_ERROR)
+
+        super().callback_before_register()
 
     @property
     def nuit(self):
