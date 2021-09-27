@@ -1,8 +1,9 @@
 import datetime
 import hashlib
 
-from saika import db, common, Service
+from saika import db, common, Service, Config
 
+from app.config import UserConfig
 from app.models.user import User, UserInfo
 
 
@@ -45,7 +46,11 @@ class UserService(Service):
         if item is None:
             return False
         else:
-            return common.obj_encrypt(dict(id=item.id, time=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            cfg = Config.get(UserConfig)  # type: UserConfig
+            login_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            return common.obj_encrypt(dict(
+                id=item.id, time=login_time,
+            ), cfg.login_expires)
 
     def change_password(self, username, old, new):
         password = self.pw_hash(old)
