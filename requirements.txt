@@ -1,3 +1,7 @@
 saika
 python-redis-lock
 flask_redis
+pymysql
+flask-caching
+beautifulsoup4
+requests
