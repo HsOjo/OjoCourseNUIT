@@ -1,4 +1,3 @@
-from app import cache
 from app.libs.nuit import NUIT
 
 CK_BASIC_INFO = 'info:basic'

@@ -49,7 +49,7 @@ class NUIT:
         college_select = bs.select_one('#xsyxdm')
         grade_select = bs.select_one('#rxnf')
 
-        [week_current] = re.findall(r'var val = .+(\d+).+;\s+\$zc\.val', resp.text)
+        [week_current] = re.findall(r'var val = .+?(\d+).+', resp.text)
         [week_total] = re.findall(r'\$zc\.val\((\d+)\);//最后一周', resp.text)
         stu_year = stu_year_option.attrs.get('value')
         colleges = {tag.text: tag.attrs.get('value') for tag in college_select.children}
@@ -171,8 +171,3 @@ class NUIT:
                     days.append(last_day.strftime('%Y-%m-%d'))
 
         return week_dates
-
-
-if __name__ == '__main__':
-    result = NUIT('http://172.13.1.32', dict(JSESSIONID='7D92A3EF9BD3F10214708E9DB43C822A')).get_date_info('20211', 22)
-    print(*result.items(), sep='\n')
