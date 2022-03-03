@@ -1,16 +1,9 @@
-from saika import Config, common
 from saika.decorator import *
 
-from app import redis
-from app.api.info.service import InfoService
 from app.api.user.decorator import ignore_auth
 from app.api.user.user_api import UserAPIController
-from app.config.nuit import NUITConfig
-from app.libs.nuit import NUIT
-from app.libs.nuit.nuit import AccessError
+from app.libs.nuit import AccessError
 from .enums import *
-
-RK_COOKIES = 'cookies'
 
 
 @doc('信息模块')
@@ -21,26 +14,17 @@ class Info(UserAPIController):
 
         @self.blueprint.errorhandler(AccessError)
         def refresh_cookies(e):
-            redis.cli.delete(RK_COOKIES)
             return self.response(*ACCESS_ERROR)
 
     @property
-    def nuit(self):
-        cfg = Config.get(NUITConfig)  # type: NUITConfig
-
-        cookies_str = redis.cli.get(RK_COOKIES)
-        if cookies_str:
-            cookies = common.from_json(cookies_str)
-        else:
-            cookies = NUIT(cfg.url_base).login(**cfg.account)
-            cookies_str = common.to_json(cookies, ensure_ascii=False)
-            redis.cli.set(RK_COOKIES, cookies_str)
-
-        return NUIT(cfg.url_base, cookies)
+    def service(self):
+        from .service import InfoService
+        return InfoService()
 
     @property
-    def service(self):
-        return InfoService(self.nuit)
+    def service_course(self):
+        from .service import CourseService
+        return CourseService()
 
     @doc('学院信息')
     @ignore_auth
@@ -67,8 +51,10 @@ class Info(UserAPIController):
     @get
     @rule('/courses')
     def courses(self):
-        info = self.current_user.info
-        self.success(**self.service.course_info(info.class_))
+        info = self.service_course.get_info(self.current_user)
+        if info is None:
+            self.error(*OTHER_TIME_ERROR)
+        self.success(*INFO_SUCCESS, **info)
 
     @doc('学期信息')
     @get
