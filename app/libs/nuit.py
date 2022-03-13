@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import bs4
 import requests
 from bs4 import Tag
+from requests import Response
 
 
 class AccessError(Exception):
@@ -20,8 +21,8 @@ class NUIT:
     def request(self, method, path, **kwargs):
         kwargs.setdefault('url', self._url_base + path)
         kwargs.setdefault('cookies', self._cookies)
-        resp = getattr(requests, method)(**kwargs)
-        if 'login_form' in resp.text:
+        resp = getattr(requests, method)(**kwargs)  # type: Response
+        if 'login_form' in resp.text or resp.status_code != 200:
             raise AccessError
         return resp
 
